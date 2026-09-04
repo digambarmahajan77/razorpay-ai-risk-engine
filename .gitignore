@@ -1,0 +1,18 @@
+# Dependencies
+node_modules/
+__pycache__/
+*.pyc
+*.pyo
+
+# Build outputs
+frontend/dist/
+frontend/dist-ssr/
+*.local
+
+# Environment & local data
+.env
+.DS_Store
+
+# IDE & Editor files
+.vscode/
+.idea/
