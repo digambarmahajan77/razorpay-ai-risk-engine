@@ -1,86 +1,203 @@
-# 🚀 RakshaPay Deployment Guide (Vercel & Fullstack)
+# 🚀 RakshaPay Deployment Guide
 
-This guide walks you through deploying **RakshaPay** to **Vercel** in minutes.
+Deploy **RakshaPay AI Fraud Risk & Verification Engine** — FastAPI backend on **Render** and React frontend on **Vercel**.
 
 ---
 
-## ⚡ Option 1: 1-Click Deploy to Vercel (Recommended)
+## 📋 Architecture Overview
 
-RakshaPay is configured with **Autonomous Demo Mode**. When deployed to Vercel, it automatically operates as an interactive AI fraud engine with full features (0–100 risk scoring, explainable SHAP factors, held-out test set metrics, interactive risk simulation, fraud spike anomaly alerts, and merchant verification workflows) with **zero configuration required**!
+```
+┌──────────────────────────┐       ┌──────────────────────────┐
+│     Vercel (Frontend)    │       │    Render (Backend)      │
+│  React + Vite + TailwindCSS  │◄──►│  FastAPI + XGBoost ML    │
+│  Autonomous Demo Mode    │       │  SQLite + Risk Scoring   │
+│  rakshapay.vercel.app    │       │  rakshapay-api.onrender.com │
+└──────────────────────────┘       └──────────────────────────┘
+```
 
-### Steps via Vercel Web Dashboard:
-1. Push your code to your GitHub / GitLab / Bitbucket repository.
-2. Log in to [vercel.com](https://vercel.com) and click **"Add New..." > "Project"**.
-3. Select your `rakshapay-ai-risk-engine` repository.
-4. Vercel will automatically detect the settings:
-   - **Framework Preset**: `Vite`
-   - **Build Command**: `cd frontend && npm install && npm run build` (or `npm run build`)
+---
+
+## 🐍 Step 1: Deploy Backend on Render (Free Tier)
+
+### Option A: One-Click Blueprint Deploy (Recommended)
+
+1. Go to [render.com](https://render.com) and sign up / log in.
+2. Click **New +** → **Blueprint** → Connect your GitHub repo `razorpay-ai-risk-engine`.
+3. Render auto-detects `render.yaml` and creates the service.
+4. Click **Apply** → Your backend deploys automatically!
+
+### Option B: Manual Web Service Setup
+
+1. Go to [Render Dashboard](https://dashboard.render.com)
+2. Click **New +** → **Web Service**
+3. Connect your GitHub repository: `digambarmahajan77/razorpay-ai-risk-engine`
+4. Configure settings:
+
+| Setting | Value |
+|---------|-------|
+| **Name** | `rakshapay-api` |
+| **Region** | Oregon (US West) |
+| **Branch** | `main` |
+| **Root Directory** | `backend` |
+| **Runtime** | `Python 3` |
+| **Build Command** | `pip install -r requirements.txt` |
+| **Start Command** | `uvicorn main:app --host 0.0.0.0 --port $PORT` |
+| **Plan** | Free |
+
+5. Under **Environment Variables**, add:
+
+| Key | Value |
+|-----|-------|
+| `PYTHON_VERSION` | `3.11.9` |
+
+6. Click **Create Web Service** → Wait 3–5 minutes for the first build.
+
+### Verify Backend is Running
+
+Once deployed, visit:
+```
+https://rakshapay-api.onrender.com/
+```
+
+You should see:
+```json
+{
+  "status": "online",
+  "service": "RakshaPay AI Fraud Risk & Verification Engine",
+  "docs": "/docs",
+  "health": "/api/health"
+}
+```
+
+Also check health endpoint:
+```
+https://rakshapay-api.onrender.com/api/health
+```
+
+Interactive API docs:
+```
+https://rakshapay-api.onrender.com/docs
+```
+
+> ⚠️ **Note**: Render free tier services spin down after 15 minutes of inactivity. The first request after sleep takes ~30-60 seconds to cold-start. This is normal.
+
+---
+
+## ⚡ Step 2: Deploy Frontend on Vercel
+
+### Via Vercel Dashboard
+
+1. Go to [vercel.com](https://vercel.com) and log in.
+2. Click **"Add New..."** → **"Project"**.
+3. Import your GitHub repo: `razorpay-ai-risk-engine`.
+4. Vercel auto-detects settings from `vercel.json`:
+   - **Framework**: Vite
+   - **Build Command**: `cd frontend && npm install && npm run build`
    - **Output Directory**: `frontend/dist`
-5. Click **Deploy**!
-6. In ~45 seconds, your live RakshaPay dashboard will be live at `https://<your-project>.vercel.app`.
+5. Before clicking Deploy, go to **Environment Variables** and add:
 
----
+| Key | Value |
+|-----|-------|
+| `VITE_API_BASE_URL` | `https://rakshapay-api.onrender.com/api` |
 
-## 💻 Option 2: Deploying via Vercel CLI
+> Replace `rakshapay-api` with your actual Render service name.
 
-If you prefer deploying from your terminal:
+6. Click **Deploy** → Live in ~45 seconds!
+
+### Via Vercel CLI
 
 ```bash
-# 1. Install Vercel CLI if not already installed
+# Install Vercel CLI
 npm install -g vercel
 
-# 2. Login to Vercel
+# Login
 vercel login
 
-# 3. Deploy to production from project root
+# Deploy from project root
 vercel --prod
 ```
 
-When prompted:
-- **Set up and deploy?**: `y`
-- **Which scope?**: Choose your Vercel account
-- **Link to existing project?**: `n`
-- **What's your project's name?**: `rakshapay`
-- **In which directory is your code located?**: `./`
-
 ---
 
-## 🔗 Connecting a Live Remote Backend (Optional)
+## 🔗 Step 3: Connect Frontend to Backend
 
-If you have deployed the FastAPI backend (e.g., on Render, Railway, Fly.io, or AWS):
+After both are deployed:
 
-1. Go to your project on the [Vercel Dashboard](https://vercel.com).
-2. Navigate to **Settings > Environment Variables**.
-3. Add the following variable:
+1. Copy your Render backend URL (e.g., `https://rakshapay-api.onrender.com`)
+2. In the **Vercel Dashboard** → Your Project → **Settings** → **Environment Variables**
+3. Add or update:
    - **Key**: `VITE_API_BASE_URL`
-   - **Value**: `https://your-fastapi-backend-url.onrender.com/api`
-4. Click **Save** and trigger a **Redeploy** in the Deployments tab.
-5. Your Vercel frontend will now communicate directly with your live Python XGBoost ML model!
+   - **Value**: `https://rakshapay-api.onrender.com/api` (add `/api` at the end!)
+4. Go to **Deployments** tab → Click **⋮** on latest → **Redeploy**
+5. Your frontend now talks to the live ML backend!
 
 ---
 
-## 🐍 Deploying the FastAPI Backend to Render (Free Tier)
+## 🔄 Autonomous Demo Mode
 
-To deploy the Python backend for free on [Render](https://render.com):
+If `VITE_API_BASE_URL` is not set, or the backend is unreachable, RakshaPay automatically activates **Autonomous Demo Mode**:
 
-1. Create an account on Render.
-2. Click **New +** > **Web Service**.
-3. Connect your repository.
-4. Fill in the following:
-   - **Name**: `rakshapay-api`
-   - **Runtime**: `Python 3`
-   - **Build Command**: `cd backend && pip install -r requirements.txt`
-   - **Start Command**: `cd backend && uvicorn main:app --host 0.0.0.0 --port $PORT`
-   - **Plan**: `Free`
-5. Click **Create Web Service**.
-6. Copy your Render service URL (e.g., `https://rakshapay-api.onrender.com`) and append `/api` to set as `VITE_API_BASE_URL` on Vercel.
+- ✅ Full interactive dashboard with mock transaction data
+- ✅ Risk scoring simulation with 0–100 score + explainable AI factors
+- ✅ Fraud trend analysis with anomaly spike detection
+- ✅ Model performance metrics display
+- ✅ Transaction filtering, search, and status management
+
+This means your Vercel deployment works immediately even without a backend!
 
 ---
 
-## 📂 Configuration Files Summary
+## 🛠 Troubleshooting
 
-- `vercel.json`: Root Vercel build and SPA rewrite configuration.
-- `frontend/vercel.json`: Frontend-level SPA fallback configuration if deployed with Root Directory set to `frontend`.
-- `package.json`: Root monorepo script runner for Vite and npm.
-- `render.yaml`: Infrastructure-as-code blueprint for deploying the FastAPI backend to Render.
-- `.env.example`: Environment variables template.
+### Backend won't start on Render
+
+1. **Check Root Directory**: Must be set to `backend` (not the repo root).
+2. **Check Python Version**: Set `PYTHON_VERSION=3.11.9` in environment variables.
+3. **Check Logs**: Render Dashboard → Your Service → **Logs** tab.
+4. **Memory Issues**: XGBoost + Pandas + NumPy can be memory-intensive. If you hit limits on the free tier, try reducing `n_samples` in the training pipeline.
+
+### Frontend can't reach backend
+
+1. Verify the backend URL ends with `/api` (e.g., `https://rakshapay-api.onrender.com/api`).
+2. Check CORS — the backend allows all origins (`allow_origins=["*"]`).
+3. Ensure `VITE_API_BASE_URL` is set correctly in Vercel and you've **redeployed** after adding it.
+4. Free-tier Render services sleep after 15 min — first request after sleep takes ~30-60 seconds.
+
+### Build fails on Vercel
+
+1. Ensure `vercel.json` exists at root with `"framework": "vite"`.
+2. The build command should be: `cd frontend && npm install && npm run build`.
+3. Output directory should be: `frontend/dist`.
+
+---
+
+## 📂 Configuration Files
+
+| File | Purpose |
+|------|---------|
+| `vercel.json` | Root Vercel build & SPA rewrite config |
+| `frontend/vercel.json` | Frontend-only SPA fallback config |
+| `render.yaml` | Render infrastructure-as-code blueprint |
+| `package.json` | Root monorepo script runner |
+| `.env.example` | Environment variables template |
+| `backend/requirements.txt` | Python dependencies for Render |
+
+---
+
+## 🚀 Quick Reference Commands
+
+```bash
+# Local development - Backend
+cd backend
+pip install -r requirements.txt
+uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+
+# Local development - Frontend
+cd frontend
+npm install
+npm run dev
+
+# Build frontend for production
+cd frontend
+npm run build
+```
