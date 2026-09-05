@@ -126,6 +126,19 @@ npm run dev
 
 ---
 
+## ☁️ Deploy to Vercel (1-Click)
+
+RakshaPay is fully pre-configured for **Vercel** with zero setup required!
+
+1. Import this repository into [Vercel](https://vercel.com).
+2. Vercel will automatically detect `vercel.json` and build the frontend with SPA catch-all routing.
+3. Click **Deploy** – the autonomous demo engine provides full interactivity, real-time risk scoring, explainable SHAP factors, and metrics right out of the box!
+4. *(Optional)* If you host the FastAPI backend (e.g., on Render or Railway), add `VITE_API_BASE_URL=https://your-backend.onrender.com/api` in Vercel project environment variables.
+
+See [DEPLOYMENT.md](file:///c:/Users/Digamber/Desktop/Razarpay/DEPLOYMENT.md) for full instructions.
+
+---
+
 ## 🎬 3-Minute Live Hackathon Demo Script
 
 1. **0:00 – Landing Screen & Vision**:

@@ -1,5 +1,6 @@
 import React from 'react';
 import { ShieldCheck, Activity, BarChart3, Search, Settings, AlertOctagon, Cpu, Play } from 'lucide-react';
+import { getIsMockEngineActive } from '../services/api';
 
 interface HeaderProps {
   activeTab: string;
@@ -70,13 +71,21 @@ export const Header: React.FC<HeaderProps> = ({
 
           {/* Backend Status Pill */}
           <div className="flex items-center space-x-2">
-            <span className="inline-flex items-center text-xs text-slate-400">
+            <span className="inline-flex items-center text-xs text-slate-300 bg-slate-800/80 px-2.5 py-1 rounded-full border border-slate-700/50">
               <span
-                className={`w-2 h-2 rounded-full mr-1.5 ${
-                  backendHealthy ? 'bg-emerald-400 animate-pulse' : 'bg-rose-500'
+                className={`w-2 h-2 rounded-full mr-2 ${
+                  backendHealthy
+                    ? getIsMockEngineActive()
+                      ? 'bg-cyan-400 animate-pulse'
+                      : 'bg-emerald-400 animate-pulse'
+                    : 'bg-rose-500'
                 }`}
               />
-              {backendHealthy ? 'AI Engine Online' : 'Backend Offline'}
+              {backendHealthy
+                ? getIsMockEngineActive()
+                  ? 'AI Engine (Demo Preview)'
+                  : 'Live API Connected'
+                : 'Backend Offline'}
             </span>
           </div>
         </div>

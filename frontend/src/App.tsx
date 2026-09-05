@@ -23,15 +23,19 @@ export function App() {
 
   // Poll backend health and load dashboard data
   const checkHealthAndLoadData = async () => {
+    setLoadingDashboard(true);
     try {
       const h = await fetchHealth();
       setBackendHealthy(h.status === 'healthy');
+    } catch (err) {
+      setBackendHealthy(false);
+    }
 
-      setLoadingDashboard(true);
+    try {
       const dash = await fetchDashboard();
       setDashboardData(dash);
     } catch (err) {
-      setBackendHealthy(false);
+      console.error('Failed to load dashboard data:', err);
     } finally {
       setLoadingDashboard(false);
     }
