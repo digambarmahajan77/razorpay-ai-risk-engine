@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import type { ModelMetrics } from '../types';
 import { fetchModelMetrics, updateSettings } from '../services/api';
 import { Activity, Target, HelpCircle, IndianRupee, Cpu } from 'lucide-react';
@@ -8,7 +8,7 @@ export const ModelPerformancePage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [reviewCostInput, setReviewCostInput] = useState(25);
 
-  const loadMetrics = async () => {
+  const loadMetrics = useCallback(async () => {
     try {
       const data = await fetchModelMetrics();
       setMetrics(data);
@@ -18,11 +18,11 @@ export const ModelPerformancePage: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
-    loadMetrics();
-  }, []);
+    void loadMetrics();
+  }, [loadMetrics]);
 
   const handleReviewCostChange = async (newVal: number) => {
     setReviewCostInput(newVal);

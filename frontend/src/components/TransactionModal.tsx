@@ -24,14 +24,21 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
       setUpdating(true);
       await updateTransactionStatus(transaction.transaction_id, newStatus);
       onStatusUpdated(transaction.transaction_id, newStatus);
-    } catch (err) {
+    } catch {
       alert('Failed to update status');
     } finally {
       setUpdating(false);
     }
   };
 
-  const explanations = transaction.explanations || (transaction.explanation_json ? JSON.parse(transaction.explanation_json) : []);
+  let explanations = transaction.explanations || [];
+  if (explanations.length === 0 && transaction.explanation_json) {
+    try {
+      explanations = JSON.parse(transaction.explanation_json);
+    } catch {
+      explanations = [];
+    }
+  }
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-fade-in">

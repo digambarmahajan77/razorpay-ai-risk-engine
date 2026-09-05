@@ -64,7 +64,7 @@ export const RiskAnalysisPage: React.FC = () => {
     try {
       const res = await analyzeTransaction(formData);
       setResult(res);
-    } catch (err) {
+    } catch {
       alert('Error running risk analysis simulation');
     } finally {
       setLoading(false);

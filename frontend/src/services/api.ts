@@ -46,7 +46,7 @@ export async function fetchHealth(): Promise<{ status: string; model_loaded: boo
     const data = await res.json();
     isMockEngineActive = false;
     return { ...data, mode: 'live' };
-  } catch (err) {
+  } catch {
     // If backend is not running or unreachable (e.g. standalone Vercel preview), activate autonomous mock engine
     isMockEngineActive = true;
     return {
@@ -221,7 +221,7 @@ export async function regenerateDemoData(): Promise<any> {
     });
     if (!res.ok) throw new Error('Failed to regenerate demo dataset');
     return await res.json();
-  } catch (err) {
+  } catch {
     return { status: 'success', message: 'Autonomous demo dataset ready' };
   }
 }

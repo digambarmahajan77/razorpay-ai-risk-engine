@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Header } from './components/Header';
 import { LandingPage } from './pages/LandingPage';
 import { DashboardPage } from './pages/DashboardPage';
@@ -22,12 +22,12 @@ export function App() {
   const [selectedTx, setSelectedTx] = useState<Transaction | null>(null);
 
   // Poll backend health and load dashboard data
-  const checkHealthAndLoadData = async () => {
+  const checkHealthAndLoadData = useCallback(async () => {
     setLoadingDashboard(true);
     try {
       const h = await fetchHealth();
       setBackendHealthy(h.status === 'healthy');
-    } catch (err) {
+    } catch {
       setBackendHealthy(false);
     }
 
@@ -39,18 +39,18 @@ export function App() {
     } finally {
       setLoadingDashboard(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
-    checkHealthAndLoadData();
-  }, []);
+    void checkHealthAndLoadData();
+  }, [checkHealthAndLoadData]);
 
   const handleSelectDemoTx = async (txId: string) => {
     try {
       const tx = await fetchTransactionDetail(txId);
       setSelectedTx(tx);
       setInDashboardMode(true);
-    } catch (err) {
+    } catch {
       alert(`Could not load transaction ${txId}`);
     }
   };

@@ -19,7 +19,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onDataRegenerated })
     try {
       await updateSettings(reviewCost);
       setMessage('Settings updated successfully!');
-    } catch (err) {
+    } catch {
       alert('Failed to update settings');
     } finally {
       setSaving(false);
@@ -34,7 +34,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ onDataRegenerated })
       await regenerateDemoData();
       setMessage('10,000 transactions regenerated & model retrained on held-out test split!');
       onDataRegenerated();
-    } catch (err) {
+    } catch {
       alert('Failed to regenerate data');
     } finally {
       setRegenerating(false);

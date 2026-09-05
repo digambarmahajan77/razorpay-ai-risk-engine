@@ -1,9 +1,26 @@
 import sqlite3
 import os
 import json
+import shutil
 import pandas as pd
 
-DB_PATH = os.path.join(os.path.dirname(__file__), "data", "rakshapay.db")
+BASE_DIR = os.path.dirname(__file__)
+SRC_DB_PATH = os.path.join(BASE_DIR, "data", "rakshapay.db")
+
+# In serverless environments (Vercel / AWS Lambda), the deployment filesystem is read-only.
+# Copy database to /tmp so write operations and SQLite lock files succeed.
+if os.environ.get("VERCEL") or os.environ.get("AWS_LAMBDA_FUNCTION_NAME"):
+    TMP_DIR = "/tmp/rakshapay_data"
+    os.makedirs(TMP_DIR, exist_ok=True)
+    DB_PATH = os.path.join(TMP_DIR, "rakshapay.db")
+    if os.path.exists(SRC_DB_PATH) and not os.path.exists(DB_PATH):
+        try:
+            shutil.copy2(SRC_DB_PATH, DB_PATH)
+        except Exception as e:
+            print(f"Notice: Failed to copy SQLite DB to /tmp: {e}")
+            DB_PATH = SRC_DB_PATH
+else:
+    DB_PATH = SRC_DB_PATH
 
 def get_db_connection():
     os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)

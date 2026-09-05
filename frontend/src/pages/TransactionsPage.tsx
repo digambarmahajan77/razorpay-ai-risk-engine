@@ -23,30 +23,34 @@ export const TransactionsPage: React.FC<TransactionsPageProps> = ({ onSelectTran
   const [merchantCategory, setMerchantCategory] = useState('ALL');
   const [status, setStatus] = useState('ALL');
 
-  const loadData = async () => {
-    setLoading(true);
-    try {
-      const res = await fetchTransactions({
-        search,
-        risk_level: riskLevel,
-        payment_method: paymentMethod,
-        merchant_category: merchantCategory,
-        status,
-        page,
-        limit: 15,
-      });
-      setTransactions(res.transactions);
-      setTotalCount(res.total_count);
-      setTotalPages(res.total_pages);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
-    loadData();
+    let isMounted = true;
+    const execute = async () => {
+      setLoading(true);
+      try {
+        const res = await fetchTransactions({
+          search,
+          risk_level: riskLevel,
+          payment_method: paymentMethod,
+          merchant_category: merchantCategory,
+          status,
+          page,
+          limit: 15,
+        });
+        if (!isMounted) return;
+        setTransactions(res.transactions);
+        setTotalCount(res.total_count);
+        setTotalPages(res.total_pages);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        if (isMounted) setLoading(false);
+      }
+    };
+    execute();
+    return () => {
+      isMounted = false;
+    };
   }, [search, riskLevel, paymentMethod, merchantCategory, status, page]);
 
   return (

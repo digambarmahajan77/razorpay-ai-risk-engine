@@ -226,6 +226,11 @@ DEMO_TRANSACTIONS = [
     }
 ]
 
+def ensure_initialized():
+    global pipeline, model_metrics
+    if pipeline is None:
+        startup_event()
+
 @app.on_event("startup")
 def startup_event():
     global pipeline, model_metrics
@@ -283,8 +288,18 @@ def startup_event():
         conn.commit()
         conn.close()
 
+@app.get("/")
+def root():
+    return {
+        "status": "online",
+        "service": "RakshaPay AI Fraud Risk & Verification Engine",
+        "docs": "/docs",
+        "health": "/api/health"
+    }
+
 @app.get("/api/health")
 def health():
+    ensure_initialized()
     return {
         "status": "healthy",
         "service": "RakshaPay Explainable AI Engine",
@@ -293,6 +308,7 @@ def health():
 
 @app.get("/api/dashboard")
 def get_dashboard_summary():
+    ensure_initialized()
     conn = get_db_connection()
     c = conn.cursor()
     
@@ -378,6 +394,7 @@ def get_transactions(
     page: int = 1,
     limit: int = 20
 ):
+    ensure_initialized()
     conn = get_db_connection()
     c = conn.cursor()
     
@@ -435,6 +452,7 @@ def get_transactions(
 
 @app.get("/api/transactions/{transaction_id}")
 def get_transaction_detail(transaction_id: str):
+    ensure_initialized()
     conn = get_db_connection()
     c = conn.cursor()
     c.execute("SELECT * FROM transactions WHERE transaction_id = ?", (transaction_id,))
@@ -452,11 +470,12 @@ def get_transaction_detail(transaction_id: str):
 
 @app.post("/api/analyze")
 def analyze_transaction(req: TransactionAnalysisRequest):
+    ensure_initialized()
     global pipeline
     if pipeline is None or pipeline.model is None:
         raise HTTPException(status_code=500, detail="ML model is not loaded")
         
-    tx_dict = req.dict()
+    tx_dict = req.model_dump() if hasattr(req, 'model_dump') else req.dict()
     
     # Calculate amount deviation if customer_avg_amount provided
     if tx_dict['customer_avg_amount'] > 0:
@@ -488,6 +507,7 @@ def analyze_transaction(req: TransactionAnalysisRequest):
 
 @app.get("/api/model-metrics")
 def get_model_metrics():
+    ensure_initialized()
     global model_metrics
     if not model_metrics:
         raise HTTPException(status_code=404, detail="Metrics not available")
@@ -495,6 +515,7 @@ def get_model_metrics():
 
 @app.get("/api/fraud-trends")
 def get_fraud_trends():
+    ensure_initialized()
     conn = get_db_connection()
     c = conn.cursor()
     
